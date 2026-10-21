@@ -14,3 +14,7 @@ desktop.ini
 # テストやお試しで置いた CODESYS の一時ファイル
 *.project.~u
 *.~u
+
+# Claude への指示とデザインルール（手元だけで使い、公開しない）
+CLAUDE.md
+DESIGN.md

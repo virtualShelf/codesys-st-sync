@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest import mock
 
 REPO = Path(__file__).resolve().parent.parent
-APP_DIR = REPO  # st_sync*.py はリポジトリ直下
+APP_DIR = REPO / "src"  # st_sync*.py は src\ の下
 FIXTURES = Path(__file__).resolve().parent / "fixtures"  # テスト用の ST
 FAKE_CODESYS = Path(__file__).resolve().parent / "fake_codesys.py"
 PROFILE = "CODESYS V3.5 SP22 Patch 4"

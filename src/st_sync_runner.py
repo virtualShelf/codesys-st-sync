@@ -12,7 +12,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 APP_DIR = Path(__file__).resolve().parent
-CMD_FILE = APP_DIR / "st-sync.cmd"
+ROOT_DIR = APP_DIR.parent  # st-sync.cmd はリポジトリ直下
+CMD_FILE = ROOT_DIR / "st-sync.cmd"
 SYNC_SCRIPT = APP_DIR / "st_sync.py"
 LOG_FILE = APP_DIR / "st_sync.log"
 TIMEOUT_SEC = 600

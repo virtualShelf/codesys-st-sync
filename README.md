@@ -38,7 +38,7 @@ st-sync.cmd export "<プロジェクト>.project" "<ST フォルダ>"   :: プ�
 st-sync.cmd import "<プロジェクト>.project" "<ST フォルダ>"   :: ST フォルダ → プロジェクトに反映して保存
 ```
 
-引数が足りないときは使い方を表示して終わる。結果は `st_sync.log` にも残る。
+引数が足りないときは使い方を表示して終わる。結果は `src\st_sync.log` にも残る。
 
 ## ほかのリポジトリから使う
 
@@ -50,7 +50,7 @@ st-sync.cmd import "<プロジェクト>.project" "<ST フォルダ>"   :: ST �
 - コマンド版：
 
 ```bat
-cd C:\Users\zosan\Documents\Programs\Projects
+cd C:\path\to\Projects   :: 3つのリポジトリを並べて置いたフォルダ
 codesys-st-sync\st-sync.cmd export "codesys-elevator\codesys\Elevator.project" "codesys-elevator\codesys\src"
 codesys-st-sync\st-sync.cmd import "codesys-elevator\codesys\Elevator.project" "codesys-elevator\codesys\src"
 ```
@@ -77,12 +77,17 @@ python tests\check_real_export.py "C:\...\YourProject.project" "C:\...\codesys\s
 
 ## ファイル
 
-| ファイル | 役割 |
-|---|---|
-| `st-sync-ui.cmd` | 画面を開く |
-| `st_sync_ui.py` | 画面（Streamlit） |
-| `st_sync_runner.py` | 画面から CODESYS を起動して結果を判定する処理 |
-| `st-sync.cmd` | コマンド版。CODESYS.exe とプロファイルの設定もここ |
-| `st_sync.py` | CODESYS 内で動く同期スクリプト（CODESYS Scripting） |
-| `requirements.txt` | 画面版に必要な Python パッケージ |
-| `tests/` | 偽 CODESYS でのテスト、画面のテスト、本物の CODESYS での確認 |
+```
+codesys-st-sync\
+  st-sync-ui.cmd        画面を開く（ダブルクリック）
+  st-sync.cmd           コマンド版。CODESYS.exe とプロファイルの設定もここ
+  requirements.txt      画面版に必要な Python パッケージ
+  src\
+    st_sync_ui.py       画面（Streamlit）
+    st_sync_runner.py   画面から CODESYS を起動して結果を判定する処理
+    st_sync.py          CODESYS 内で動く同期スクリプト（CODESYS Scripting）
+  tests\               偽 CODESYS でのテスト、画面のテスト、本物の CODESYS での確認
+    fixtures\          テスト用の ST
+```
+
+使う人が触るのはルートの `.cmd` 2つだけ。中身の Python は `src\` にまとめてある。

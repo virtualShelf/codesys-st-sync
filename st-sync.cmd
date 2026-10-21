@@ -32,9 +32,9 @@ set "ST_SYNC_DIR=%~f3"
 echo running %ST_SYNC_MODE% ...
 echo   project : %ST_SYNC_PROJECT%
 echo   ST dir  : %ST_SYNC_DIR%
-"%CODESYS_EXE%" --profile="%CODESYS_PROFILE%" --runscript="%~dp0st_sync.py" --noUI
+"%CODESYS_EXE%" --profile="%CODESYS_PROFILE%" --runscript="%~dp0src\st_sync.py" --noUI
 echo.
-type "%~dp0st_sync.log"
+type "%~dp0src\st_sync.log"
 exit /b 0
 
 :usage
