@@ -47,21 +47,29 @@ def main():
             return 1
 
         ok = True
-        for src in sorted(st_dir.glob("*.st")):
-            exported = out_dir / src.name
-            if not exported.exists():
-                print("NG: {0} がプロジェクトにありません（import していない？）".format(src.name))
+        # 種類ごとのサブフォルダも含めて、ファイル名で突き合わせる
+        mine = {p.name.lower(): p for p in st_dir.rglob("*.st")}
+        theirs = {p.name.lower(): p for p in out_dir.rglob("*.st")}
+        for key in sorted(mine):
+            src = mine[key]
+            rel = src.relative_to(st_dir).as_posix()
+            exported = theirs.get(key)
+            if exported is None:
+                print("NG: {0} がプロジェクトにありません（import していない？）".format(rel))
                 ok = False
                 continue
+            expected_rel = exported.relative_to(out_dir).as_posix()
+            if rel != expected_rel:
+                print("参考: {0} は {1} に置くと、export の置き場所と揃います".format(rel, expected_rel))
             a, b = normalize(src), normalize(exported)
             if a == b:
-                print("OK: " + src.name)
+                print("OK: " + rel)
             else:
                 ok = False
-                print("NG: {0} がプロジェクトの中身と違います".format(src.name))
-                for line in difflib.unified_diff(a, b, "ST フォルダ/" + src.name, "project", lineterm=""):
+                print("NG: {0} がプロジェクトの中身と違います".format(rel))
+                for line in difflib.unified_diff(a, b, "ST フォルダ/" + rel, "project", lineterm=""):
                     print("    " + line)
-        extra = sorted(p.name for p in out_dir.glob("*.st") if not (st_dir / p.name).exists())
+        extra = sorted(theirs[k].relative_to(out_dir).as_posix() for k in theirs if k not in mine)
         if extra:
             print("参考: ST フォルダにないオブジェクトがプロジェクトにあります: " + ", ".join(extra))
         print("結果: " + ("一致しました" if ok else "差分があります"))

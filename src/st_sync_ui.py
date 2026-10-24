@@ -105,7 +105,7 @@ if st.session_state.st_dir:
     if not folder.is_dir():
         st.caption("📁 まだありません。エクスポート時に作成します")
     else:
-        count = sum(1 for p in folder.iterdir() if p.suffix.lower() == ".st")
+        count = sum(1 for p in folder.rglob("*.st") if p.is_file())  # 種類ごとのサブフォルダも数える
         st.caption("✅ .st ファイル {0} 個".format(count))
 
 settings = runner.Settings(

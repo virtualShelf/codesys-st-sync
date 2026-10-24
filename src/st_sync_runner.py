@@ -106,7 +106,7 @@ def check(settings, mode):
             problems.append("ST フォルダの場所にフォルダ以外のファイルがあります")
     elif not Path(folder).is_dir():
         problems.append("ST フォルダがまだありません。先にエクスポートしてください")
-    elif not any(p.suffix.lower() == ".st" for p in Path(folder).iterdir()):
+    elif not any(p.suffix.lower() == ".st" for p in Path(folder).rglob("*") if p.is_file()):
         problems.append("ST フォルダに .st ファイルがありません。先にエクスポートしてください")
     return problems
 

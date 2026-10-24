@@ -69,7 +69,7 @@ class TestUI(unittest.TestCase):
             button(at, "エクスポート").click().run()
             self.assertFalse(at.exception)
             self.assertTrue(any("エクスポートしました" in s.value for s in at.success))
-            self.assertTrue((src / "PLC_PRG.st").exists())
+            self.assertTrue((src / "PRGs" / "PLC_PRG.st").exists())  # 種類ごとのフォルダに書き出す
 
             # エクスポートした src の .st からインポートできる
             self.assertFalse(button(at, "インポート").disabled)

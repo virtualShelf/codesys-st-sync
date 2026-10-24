@@ -48,11 +48,20 @@ class Workspace:
         return runner.Settings(**values)
 
     def project_objects(self):
-        return json.loads(self.project.read_text(encoding="utf-8"))
+        """プロジェクトの POU / DUT / GVL（フォルダは除く）"""
+        return [o for o in json.loads(self.project.read_text(encoding="utf-8")) if o.get("kind") != "folder"]
+
+    def project_folders(self):
+        return sorted(o["name"] for o in json.loads(self.project.read_text(encoding="utf-8"))
+                      if o.get("kind") == "folder")
+
+    def placement(self):
+        """{オブジェクト名: 入っているフォルダ名}"""
+        return {o["name"]: o.get("folder") for o in self.project_objects()}
 
     def edit_project(self, name, old, new):
         """CODESYS の画面で宣言部を書き換えた想定"""
-        objs = self.project_objects()
+        objs = json.loads(self.project.read_text(encoding="utf-8"))
         for o in objs:
             if o["name"] == name:
                 o["decl"] = o["decl"].replace(old, new)

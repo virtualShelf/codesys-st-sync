@@ -6,9 +6,90 @@
 - **export**：プロジェクト → ST フォルダ（`*.st` に書き出す）
 - **import**：ST フォルダ → プロジェクト（POU / DUT / GVL を作成・上書きして保存）
 
-対象は ST で書けるオブジェクト（PROGRAM / FUNCTION_BLOCK / FUNCTION / DUT / GVL）だけ。FB のメソッド・アクションやデバイスツリーの設定は対象外。
+対象は ST で書けるオブジェクト（PROGRAM / FUNCTION_BLOCK / FUNCTION / DUT / GVL / INTERFACE と、メソッド・プロパティ・アクション）だけ。DUT は列挙型・構造体（`EXTENDS` も可）・共用体・別名に対応。タスク設定やデバイスツリーの設定は対象外。
 
 どちらの方法でも、**実行前に CODESYS の画面でプロジェクトを閉じる**（開いたままだとロックされて失敗する）。
+
+## 種類ごとのフォルダ
+
+オブジェクトは種類ごとのフォルダに分けて置く。ST フォルダ側と CODESYS 側で同じ名前のフォルダを使う。
+
+| 種類 | フォルダ |
+|---|---|
+| DUT（列挙型・構造体など） | `DUTs` |
+| GVL（グローバル変数） | `GVLs` |
+| INTERFACE | `ITFs` |
+| FUNCTION | `FCs` |
+| FUNCTION_BLOCK | `FBs` |
+| PROGRAM | `PRGs` |
+
+```
+codesys\src\                     CODESYS（Application の下）
+  DUTs\E_ElevState.st             Application
+  FBs\FB_Elevator.st                DUTs\  E_ElevState
+  FCs\FC_FloorBit.st                FBs\   FB_Elevator
+  GVLs\GVL_ElevIO.st                FCs\   FC_FloorBit
+  PRGs\PRG_Elevator.st              GVLs\  GVL_ElevIO
+                                     PRGs\  PRG_Elevator
+```
+
+- **export**：`<ST フォルダ>\<種類のフォルダ>\<名前>.st` に書き出す。前に別の場所（フォルダ分けする前の直下など）に書き出した同じ名前の `.st` は消す
+- **import**：ST フォルダの `.st` をサブフォルダも含めて読む。CODESYS の Application の下に種類ごとのフォルダを作り、オブジェクトを入れる。別の場所にあるオブジェクトはそのフォルダに移す
+- **置き場所は種類で決まる**：`.st` をどのサブフォルダに置いても、CODESYS では種類のフォルダに入る。次の export で ST フォルダ側も種類のフォルダに並び直す
+- **同じ名前の `.st` が2つあると import しない**（プロジェクトは変更せず、エラーにする）
+- フォルダ名を変えたいときは、`src\st_sync.py` の `FOLDERS` の表を書き換える
+
+## メソッド・プロパティ・アクションの書き方
+
+CODESYS ではメソッド・プロパティ・アクションが FB / PRG / INTERFACE の下の別々のオブジェクトになっているが、`.st` では親と同じ1つのファイルにまとめる。
+
+```
+FUNCTION_BLOCK FB_Door IMPLEMENTS I_Door
+VAR
+    bOpen : BOOL;
+END_VAR
+
+(* FB の本体 *)
+
+METHOD Open : BOOL
+VAR_INPUT
+    bForce : BOOL;
+END_VAR
+
+bOpen := TRUE;
+Open := bOpen;
+END_METHOD
+
+PROPERTY IsOpen : BOOL
+GET
+IsOpen := bOpen;
+END_GET
+END_PROPERTY
+
+ACTION ResetDoor
+bOpen := FALSE;
+END_ACTION
+
+END_FUNCTION_BLOCK
+```
+
+| ブロック | 中身 |
+|---|---|
+| `METHOD … END_METHOD` | 宣言（最後の `END_VAR` まで）と中身。インターフェースでは宣言だけ |
+| `PROPERTY … END_PROPERTY` | 先頭の行がプロパティの宣言。`GET … END_GET` / `SET … END_SET` が Get / Set の中身。`VAR … END_VAR` を書けば Get / Set の宣言も置き換える（書かなければ CODESYS の既定のまま） |
+| `ACTION … END_ACTION` | アクションの中身（FB / PRG のみ） |
+
+- `END_METHOD` などの区切りと、最後の `END_FUNCTION_BLOCK` / `END_PROGRAM` / `END_INTERFACE` は、CODESYS には書き込まない
+- **export**：メンバーがある FB / PRG だけ、後ろにメンバーと `END_FUNCTION_BLOCK` / `END_PROGRAM` を付ける。メンバーが無ければ今までと同じ形。インターフェースはいつも `END_INTERFACE` を付ける
+- **import**：ファイルにあるメンバーを作成・上書きする。**ファイルから消したメンバー（`GET` だけにしたときの Set も）はプロジェクトからも消す**
+- **古い形のファイル**（メンバーも `END_FUNCTION_BLOCK` も無い、この機能より前に書き出したもの）を import したときは、CODESYS にあるメンバーを消さずに残す（ログに `KEEP`）。一度 export すれば新しい形になる
+- 対象は ST で書いたメンバーだけ。SFC のトランジションなどは対象外
+
+### フォルダ分けする前のプロジェクトを移すとき
+
+1. **export** する → ST フォルダが種類ごとのフォルダに並び直る（直下の古い `.st` は消える）
+2. **import** する → CODESYS 側にフォルダができ、オブジェクトが移る
+3. CODESYS でプロジェクトを開いて、ビルドが通ることを確かめる
 
 ## 画面版（Streamlit）
 
